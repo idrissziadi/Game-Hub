@@ -12,6 +12,7 @@ import PhaserGame from './components/PhaserGame';
 import RockRollPaper from './pages/RockRollPaper';
 import SimonSays from './pages/SimonSays';
 import Game from './pages/Game';
+import FlipGame from './pages/FlipGame';
 function App() {
   return (
     <ThemeProvider theme={theme}> 
@@ -27,6 +28,7 @@ function App() {
         <Route path='/RockPaperScissor' Component={RockRollPaper} />
         <Route path='SimonSays' Component={SimonSays} />
         <Route path='Game' Component={Game} />
+        <Route path='flipgame' Component={FlipGame} />
       </Routes>
     </BrowserRouter>
     </ThemeProvider>
