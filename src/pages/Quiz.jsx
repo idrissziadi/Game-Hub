@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Checkbox, Grid, Paper, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { quizCategories } from './../assets/data';
 import { Howl } from 'howler';
 
@@ -14,6 +15,8 @@ function Quiz() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [score, setScore] = useState(0);
+
+  const navigate = useNavigate();
 
   const handleStart = (selectedCategory) => {
     clickSound.play();
@@ -57,12 +60,19 @@ function Quiz() {
     setSelectedOptions([]);
   };
 
+  const changeCategory = () => {
+    if (window.confirm("Are you sure you want to change the category? Any progress will be lost.")) {
+      clickSound.play();
+      restartQuiz();
+    }
+  };
+
   if (!start) {
     return (
       <Grid container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#310000' }}>
         <Grid item md={6} xs={12}>
           <Paper sx={{ borderRadius: '16px', padding: '20px', background: '#731010' }}>
-            <Typography variant="h4" textAlign="center" color="primary">Choisissez une catégorie de quiz</Typography>
+            <Typography variant="h4" textAlign="center" color="primary">Choose a Quiz Category</Typography>
             <Grid container spacing={2} justifyContent="center" marginTop="20px">
               {Object.keys(quizCategories).map((cat) => (
                 <Grid item key={cat}>
@@ -70,6 +80,14 @@ function Quiz() {
                 </Grid>
               ))}
             </Grid>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => navigate('/Home')}
+              sx={{ marginTop: '20px' }}
+            >
+              Home
+            </Button>
           </Paper>
         </Grid>
       </Grid>
@@ -81,9 +99,25 @@ function Quiz() {
       <Grid container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#310000' }}>
         <Grid item md={6} xs={12}>
           <Paper sx={{ borderRadius: '16px', padding: '20px', background: '#731010' }}>
-            <Typography variant="h4" color="primary">Quiz Terminé!</Typography>
-            <Typography variant="h5" color="primary">Votre Score: {score}/{questions.length}</Typography>
-            <Button fullWidth onClick={restartQuiz} variant="contained" color="primary">Recommencer</Button>
+            <Typography variant="h4" color="primary">Quiz Completed!</Typography>
+            <Typography variant="h5" color="primary">Your Score: {score}/{questions.length}</Typography>
+            <Button fullWidth onClick={restartQuiz} variant="contained" color="primary">Restart</Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={changeCategory}
+              sx={{ marginTop: '20px' }}
+            >
+              Categories
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => navigate('/Home')}
+              sx={{ marginTop: '20px' }}
+            >
+              Home
+            </Button>
           </Paper>
         </Grid>
       </Grid>
@@ -113,13 +147,24 @@ function Quiz() {
               ))}
             </Grid>
             <Grid item md={12} xs={12}>
-              <Grid container sx={{ display: 'flex', justifyContent: 'end' }}>
-                <Grid item md={1}>
+              <Grid container sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Grid item md={2}>
+                  <Button fullWidth onClick={changeCategory} variant="contained" color="secondary">Change Category</Button>
+                </Grid>
+                <Grid item md={2}>
                   <Button fullWidth onClick={submit} disabled={selectedOptions.length === 0} variant="contained" color="primary">Submit</Button>
                 </Grid>
               </Grid>
             </Grid>
           </Grid>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => {navigate('/Home') ; clickSound.play()}}
+            sx={{ marginTop: '20px' }}
+          >
+            Home
+          </Button>
         </Paper>
       </Grid>
     </Grid>

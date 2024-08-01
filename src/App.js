@@ -9,18 +9,20 @@ import Quiz from './pages/Quiz';
 import TenziesGame from './pages/TenziesGame';
 import DiceRoller from './pages/DiceRoller';
 import PhaserGame from './components/PhaserGame';
+import RockRollPaper from './pages/RockRollPaper';
 function App() {
   return (
     <ThemeProvider theme={theme}> 
     <BrowserRouter>
       <Routes>
         <Route path='/' Component={Home}/>
+        <Route path='/Home' Component={Home}/>
         <Route path='/About' Component={AboutUs} />
         <Route path='/Contact' Component={ContactUs} />
         <Route path='/Quiz' Component={Quiz} />
         <Route path='/TenziesGame' Component={TenziesGame} />
         <Route path='/DiceRoller' Component={DiceRoller} />
-        <Route path='/PhaserGame' Component={PhaserGame} />
+        <Route path='/RockPaperScissor' Component={RockRollPaper} />
       </Routes>
     </BrowserRouter>
     </ThemeProvider>
