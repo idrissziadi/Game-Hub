@@ -1,0 +1,113 @@
+/* App.css */
+* { 
+	margin: 0; 
+	padding: 0; 
+	box-sizing: border-box; 
+} 
+
+.App { 
+	height: 100vh; 
+	width: 100vw; 
+	font-family: cursive; 
+	background-color: rgb(21, 56, 66); 
+} 
+
+/* CSS for GameBoard component */
+.container { 
+	display: flex; 
+	flex-direction: column; 
+} 
+
+.header { 
+	display: flex; 
+	flex-direction: row; 
+	padding: 10px; 
+	display: flex; 
+	justify-content: center; 
+	align-items: center; 
+} 
+
+h1 { 
+	align-self: start; 
+	font-size: 2.5rem; 
+	color: rgb(247, 247, 247); 
+
+} 
+
+.button { 
+	display: flex; 
+	align-items: center; 
+	justify-content: center; 
+	padding: 0.5rem 0.8rem; 
+	font-family: cursive; 
+	width: 200px; 
+	font-size: 1.2rem; 
+	font-weight: bolder; 
+	border-radius: 0.7rem; 
+	border-style: none; 
+	background-color: red; 
+	color: white; 
+	margin-top: 4px; 
+	margin-left: 55%; 
+} 
+
+.button:hover { 
+	border: 2px solid black; 
+	cursor: pointer; 
+} 
+
+
+
+.board { 
+	display: grid; 
+	margin: auto; 
+	margin-top: 3rem; 
+	grid-template-columns: repeat(4, 9rem); 
+	place-items: center; 
+	row-gap: 2rem; 
+} 
+
+.comments { 
+	padding: 0.25rem 1rem; 
+	background-color: white; 
+	margin: auto; 
+	margin-top: 40px; 
+	text-align: center; 
+	border-radius: 2rem; 
+} 
+
+/* CSS for Card component */
+.face { 
+	height: 6rem; 
+} 
+
+.back { 
+	height: 6rem; 
+	width: 6rem; 
+	background-color: rgb(253, 218, 175); 
+	color: rgb(61, 21, 21); 
+	border: 1px solid black; 
+	border-radius: 50%; 
+} 
+
+.item .face { 
+	position: absolute; 
+	transform: rotateY(90deg); 
+	transition: all ease-in 0.25s; 
+
+} 
+
+.toggled .face { 
+	transform: rotateY(0deg); 
+	transition-delay: 0.25s; 
+} 
+
+.item .back { 
+	transition: all ease-in 0.25s; 
+	transition-delay: 0.25s; 
+} 
+
+.toggled .back { 
+	transform: rotateY(90deg); 
+	transition-delay: 0s; 
+}
