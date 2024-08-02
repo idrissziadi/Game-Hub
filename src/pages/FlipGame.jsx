@@ -1,164 +1,170 @@
-// src/App.js
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { Howl } from 'howler';
+import { ThemeProvider, Container, Button, Select, MenuItem, Typography } from '@mui/material';
+import theme from '../theme';  // Adjust the path as necessary
+import paperSoundFile from './../assets/paper.mp3';
+import clickSoundFile from './../assets/button.wav';
+import './../styles/MemoryGame.css';
 
-import React, { useState, useEffect } from 'react';
-import { Button, Grid, Paper, Typography, Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText, ThemeProvider } from "@mui/material";
-import { keyframes } from '@emotion/react';
-import { Howl } from 'howler'; // Import Howler for sound
-import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
-import Pile from "./../components/Pile";
-import Face from "./../components/Face";
-import theme from '../theme';
+const Data = [
+  { id: 1, name: "react", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165802/atom-4.png", matched: false },
+  { id: 2, name: "java", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165803/java.png", matched: false },
+  { id: 3, name: "css", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165803/css-3-1.png", matched: false },
+  { id: 4, name: "node", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165805/nodejs-1.png", matched: false },
+  { id: 5, name: "html", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165806/html-5-1.png", matched: false },
+  { id: 6, name: "js", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165804/js-3.png", matched: false },
+  { id: 7, name: "react", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165802/atom-4.png", matched: false },
+  { id: 8, name: "java", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165803/java.png", matched: false },
+  { id: 9, name: "css", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165803/css-3-1.png", matched: false },
+  { id: 10, name: "node", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165805/nodejs-1.png", matched: false },
+  { id: 11, name: "html", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165806/html-5-1.png", matched: false },
+  { id: 12, name: "js", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165804/js-3.png", matched: false },
+];
 
-const bounce = keyframes`
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
+function Card({ item, handleSelectedCards, toggled, stopflip }) {
+  const paperSound = new Howl({ src: [paperSoundFile] });
+
+  return (
+    <div className="item" onClick={() => !stopflip && paperSound.play() && handleSelectedCards(item)}>
+      <div className={toggled ? "toggled" : ""}>
+        <img className="face" src={item.img} alt="face" />
+        <div className="back"></div>
+      </div>
+    </div>
+  );
+}
+
+function MemoryGame() {
+  const [cardsArray, setCardsArray] = React.useState([]);
+  const [moves, setMoves] = React.useState(0);
+  const [firstCard, setFirstCard] = React.useState(null);
+  const [secondCard, setSecondCard] = React.useState(null);
+  const [stopFlip, setStopFlip] = React.useState(false);
+  const [won, setWon] = React.useState(0);
+  const [timer, setTimer] = React.useState(0);
+  const [difficulty, setDifficulty] = React.useState("easy");
+  const navigate = useNavigate();
+
+  const buttonClickSound = new Howl({ src: [clickSoundFile] });
+
+  function NewGame() {
+    buttonClickSound.play();
+    setTimeout(() => {
+      const randomOrderArray = Data.sort(() => 0.5 - Math.random());
+      setCardsArray(randomOrderArray);
+      setMoves(0);
+      setFirstCard(null);
+      setSecondCard(null);
+      setWon(0);
+      setTimer(0);
+    }, 1200);
   }
-  40% {
-    transform: translateY(-30px);
+
+  function handleSelectedCards(item) {
+    if (firstCard !== null && firstCard.id !== item.id) {
+      setSecondCard(item);
+    } else {
+      setFirstCard(item);
+    }
   }
-  60% {
-    transform: translateY(-15px);
+
+  React.useEffect(() => {
+    if (firstCard && secondCard) {
+      setStopFlip(true);
+      if (firstCard.name === secondCard.name) {
+        setCardsArray((prevArray) => {
+          return prevArray.map((unit) => {
+            if (unit.name === firstCard.name) {
+              return { ...unit, matched: true };
+            } else {
+              return unit;
+            }
+          });
+        });
+        setWon((preVal) => preVal + 1);
+        removeSelection();
+      } else {
+        setTimeout(() => {
+          removeSelection();
+        }, 1000);
+      }
+    }
+  }, [firstCard, secondCard]);
+
+  function removeSelection() {
+    setFirstCard(null);
+    setSecondCard(null);
+    setStopFlip(false);
+    setMoves((prevValue) => prevValue + 1);
   }
-`;
 
-// Define the click sound
-const clickSound = new Howl({ src: ['/assets/button.wav'] });
-
-function FlipGame() {
-  const navigate = useNavigate(); // Initialize navigate
-  const [numberFlips, setNumberFlips] = useState(0);
-  const [numberHeads, setNumberHeads] = useState(0);
-  const [numberTails, setNumberTails] = useState(0);
-  const [componentIndex, setComponentIndex] = useState(0);
-  const [flipHistory, setFlipHistory] = useState([]);
-  const [longestStreak, setLongestStreak] = useState({ heads: 0, tails: 0 });
-  const [currentStreak, setCurrentStreak] = useState({ heads: 0, tails: 0 });
-  const [openDialog, setOpenDialog] = useState(false);
-
-  useEffect(() => {
-    // Animation happens only once on component mount
-    const timer = setTimeout(() => {
-      document.getElementById('animation-container').style.animation = `${bounce} 2s infinite`;
-    }, 100);
-
-    return () => clearTimeout(timer);
+  React.useEffect(() => {
+    NewGame();
   }, []);
 
-  function playClickSound() {
-    clickSound.play(); // Play the click sound
-  }
-
-  function handleFlip() {
-    playClickSound(); // Play the click sound
-    const index = Math.round(Math.random());
-    setComponentIndex(index);
-    setNumberFlips(prevNumberFlips => prevNumberFlips + 1);
-    if (index === 0) {
-      setNumberHeads(prevNumberHeads => prevNumberHeads + 1);
-      setCurrentStreak(prevStreak => ({ ...prevStreak, heads: prevStreak.heads + 1, tails: 0 }));
-    } else {
-      setNumberTails(prevNumberTails => prevNumberTails + 1);
-      setCurrentStreak(prevStreak => ({ ...prevStreak, tails: prevStreak.tails + 1, heads: 0 }));
+  React.useEffect(() => {
+    let interval;
+    if (won !== 6) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev + 1);
+      }, 1000);
+    } else if (won === 6) {
+      clearInterval(interval);
     }
-
-    setFlipHistory(prevHistory => [...prevHistory, index === 0 ? "Heads" : "Tails"]);
-
-    if (currentStreak.heads > longestStreak.heads) {
-      setLongestStreak(prevStreak => ({ ...prevStreak, heads: currentStreak.heads }));
-    }
-    if (currentStreak.tails > longestStreak.tails) {
-      setLongestStreak(prevStreak => ({ ...prevStreak, tails: currentStreak.tails }));
-    }
-  }
-
-  function handleReset() {
-    playClickSound(); // Play the click sound
-    setNumberFlips(0);
-    setNumberHeads(0);
-    setNumberTails(0);
-    setFlipHistory([]);
-    setCurrentStreak({ heads: 0, tails: 0 });
-    setLongestStreak({ heads: 0, tails: 0 });
-  }
-
-  function handleOpenDialog() {
-    playClickSound(); // Play the click sound
-    setOpenDialog(true);
-  }
-
-  function handleCloseDialog() {
-    playClickSound(); // Play the click sound
-    setOpenDialog(false);
-  }
+    return () => clearInterval(interval);
+  }, [won]);
 
   return (
     <ThemeProvider theme={theme}>
-      <Grid container minHeight={"100vh"} sx={{ display: "flex", justifyContent: "center", alignItems: "center", background: theme.palette.background.default, padding: '20px' }}>
-        <Paper sx={{ padding: "40px", borderRadius: theme.shape.borderRadius, background: theme.palette.background.paper, width: '100%', maxWidth: '800px', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.5)' }}>
-          <Grid container spacing={4} id="animation-container">
-            <Grid item xs={12} sx={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
-              <Typography variant="h3" sx={{ fontFamily: theme.typography.fontFamily, color: theme.palette.primary.main }}>Let's Flip A Coin</Typography>
-            </Grid>
-
-            <Grid item xs={12} sx={{ display: "flex", justifyContent: "center" }}>
-              {componentIndex === 0 ? <Face /> : <Pile />}
-            </Grid>
-
-            <Grid item xs={12} sx={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
-              <Grid container spacing={2} justifyContent="center">
-                <Grid item>
-                  <Button variant="contained" size="large" onClick={handleFlip} sx={{ width: '150px', fontSize: '1.2rem', background: theme.palette.primary.main }}>
-                    Flip Me!
-                  </Button>
-                </Grid>
-                <Grid item>
-                  <Button variant="contained" size="large" onClick={handleOpenDialog} sx={{ width: '300px', fontSize: '1.2rem', background: theme.palette.primary.main }}>
-                    Show Stats
-                  </Button>
-                </Grid>
-                <Grid item>
-                  <Button variant="outlined" size="large" onClick={handleReset} sx={{ width: '150px', fontSize: '1.2rem', color: theme.palette.primary.main, borderColor: theme.palette.primary.main }}>
-                    Reset
-                  </Button>
-                </Grid>
-              </Grid>
-            </Grid>
-
-            <Grid item xs={12} sx={{ display: "flex", justifyContent: "center" }}>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => {navigate('/Home') ; playClickSound(); }  }
-                sx={{ mt: 3, ml: 2, width: '150px' }}
-              >
-                Home
-              </Button>
-            </Grid>
-          </Grid>
-        </Paper>
-      </Grid>
-
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Flip Statistics</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Out of {numberFlips} flips, there have been {numberHeads} heads and {numberTails} tails
-          </DialogContentText>
-          <DialogContentText>
-            Longest Heads Streak: {longestStreak.heads} | Longest Tails Streak: {longestStreak.tails}
-          </DialogContentText>
-          <DialogContentText>
-            Flip History: {flipHistory.join(", ")}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Close
+      <Container className="App" maxWidth="sm">
+        <div className="container">
+          <div className="header">
+            <Typography variant="h3" gutterBottom>Memory Game</Typography>
+            <Select
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+            >
+              <MenuItem value="easy">Easy</MenuItem>
+              <MenuItem value="medium">Medium</MenuItem>
+              <MenuItem value="hard">Hard</MenuItem>
+            </Select>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => { buttonClickSound.play(); navigate('/Home'); }}
+            >
+              Home
+            </Button>
+          </div>
+          <div className="board">
+            {cardsArray.map((item) => (
+              <Card
+                item={item}
+                key={item.id}
+                handleSelectedCards={handleSelectedCards}
+                toggled={item === firstCard || item === secondCard || item.matched === true}
+                stopflip={stopFlip}
+              />
+            ))}
+          </div>
+          {won !== 6 ? (
+            <div className="comments">
+              <Typography>Moves : {moves}</Typography>
+              <Typography>Timer: {timer}s</Typography>
+            </div>
+          ) : (
+            <div className="comments">
+              <Typography>🎉 You Won in {moves} moves and {timer} seconds! 🎉</Typography>
+            </div>
+          )}
+          <Button variant="contained" color="secondary" onClick={NewGame}>
+            New Game
           </Button>
-        </DialogActions>
-      </Dialog>
+        </div>
+      </Container>
     </ThemeProvider>
   );
 }
 
-export default FlipGame;
+export default MemoryGame;

@@ -1,171 +1,162 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { Button, Grid, IconButton, Paper, Typography, Modal, Box } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Howl } from 'howler';
-import paperSoundFile from './../assets/paper.mp3';
-import clickSoundFile from './../assets/button.wav';
-import './../styles/MemoryGame.css';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 
-// Define the data array
-const Data = [
-  { id: 1, name: "react", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165802/atom-4.png", matched: false },
-  { id: 2, name: "java", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165803/java.png", matched: false },
-  { id: 3, name: "css", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165803/css-3-1.png", matched: false },
-  { id: 4, name: "node", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165805/nodejs-1.png", matched: false },
-  { id: 5, name: "html", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165806/html-5-1.png", matched: false },
-  { id: 6, name: "js", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165804/js-3.png", matched: false },
-  { id: 7, name: "react", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165802/atom-4.png", matched: false },
-  { id: 8, name: "java", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165803/java.png", matched: false },
-  { id: 9, name: "css", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165803/css-3-1.png", matched: false },
-  { id: 10, name: "node", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165805/nodejs-1.png", matched: false },
-  { id: 11, name: "html", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165806/html-5-1.png", matched: false },
-  { id: 12, name: "js", img: "https://media.geeksforgeeks.org/wp-content/uploads/20230927165804/js-3.png", matched: false },
-];
+// Updated paths assuming files are in the public/assets folder
+const flipSound = new Howl({ src: ['/assets/flip.wav'] });
+const matchSound = new Howl({ src: ['/assets/match.mp3'] });
+const winSound = new Howl({ src: ['/assets/win.mp3'] });
+const loseSound = new Howl({ src: ['/assets/lose.mp3'] });
+const clickSound = new Howl({ src: ['/assets/button.wav'] });
 
-// Card component
-function Card({ item, handleSelectedCards, toggled, stopflip }) {
-  const paperSound = new Howl({ src: [paperSoundFile] });
+const initialCards = () => {
+  const icons = ['🍎', '🍌', '🍇', '🍉', '🍓', '🍒', '🍑', '🍍', '🍅', '🥝', '🍋', '🍊'];
+  const cards = [...icons, ...icons]
+    .map((icon) => ({ icon, id: Math.random() }))
+    .sort(() => Math.random() - 0.5);
+  return cards;
+};
 
-  return (
-    <div className="item" onClick={() => !stopflip && paperSound.play() && handleSelectedCards(item)}>
-      <div className={toggled ? "toggled" : ""}>
-        <img className="face" src={item.img} alt="face" />
-        <div className="back"></div>
-      </div>
-    </div>
-  );
-}
-
-// GameBoard component
-function MemoryGame() {
-  const [cardsArray, setCardsArray] = React.useState([]);
-  const [moves, setMoves] = React.useState(0);
-  const [firstCard, setFirstCard] = React.useState(null);
-  const [secondCard, setSecondCard] = React.useState(null);
-  const [stopFlip, setStopFlip] = React.useState(false);
-  const [won, setWon] = React.useState(0);
-  const [timer, setTimer] = React.useState(0);
-  const [difficulty, setDifficulty] = React.useState("easy");
+const MemoryGame = () => {
+  const theme = useTheme();
   const navigate = useNavigate();
 
-  const buttonClickSound = new Howl({ src: [clickSoundFile] });
+  const [cards, setCards] = useState(initialCards());
+  const [flippedCards, setFlippedCards] = useState([]);
+  const [matchedCards, setMatchedCards] = useState([]);
+  const [gameWon, setGameWon] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [moves, setMoves] = useState(0);
 
-  // Function to start a new game
-  function NewGame() {
-    buttonClickSound.play();
-    setTimeout(() => {
-      const randomOrderArray = Data.sort(() => 0.5 - Math.random());
-      setCardsArray(randomOrderArray);
-      setMoves(0);
-      setFirstCard(null);
-      setSecondCard(null);
-      setWon(0);
-      setTimer(0);
-    }, 1200);
-  }
-
-  // Function to handle selected cards
-  function handleSelectedCards(item) {
-    if (firstCard !== null && firstCard.id !== item.id) {
-      setSecondCard(item);
-    } else {
-      setFirstCard(item);
+  useEffect(() => {
+    if (matchedCards.length === cards.length) {
+      setGameWon(true);
+      winSound.play();
     }
-  }
+  }, [matchedCards]);
 
-  // Effect to check if the selected cards match
-  React.useEffect(() => {
-    if (firstCard && secondCard) {
-      setStopFlip(true);
-      if (firstCard.name === secondCard.name) {
-        setCardsArray((prevArray) => {
-          return prevArray.map((unit) => {
-            if (unit.name === firstCard.name) {
-              return { ...unit, matched: true };
-            } else {
-              return unit;
-            }
-          });
-        });
-        setWon((preVal) => preVal + 1);
-        removeSelection();
-      } else {
-        setTimeout(() => {
-          removeSelection();
-        }, 1000);
+  const handleShowInstructions = () => {
+    setModalOpen(true);
+    clickSound.play();
+  };
+
+  const handleCloseInstructions = () => {
+    setModalOpen(false);
+    clickSound.play();
+  };
+
+  const handleCardClick = (card) => {
+    if (flippedCards.length < 2 && !flippedCards.includes(card) && !matchedCards.includes(card)) {
+      flipSound.play();
+      setFlippedCards((prev) => [...prev, card]);
+    }
+  };
+
+  useEffect(() => {
+    if (flippedCards.length === 2) {
+      setMoves(moves + 1);
+      const [firstCard, secondCard] = flippedCards;
+
+      if (firstCard.icon === secondCard.icon) {
+        setMatchedCards((prev) => [...prev, firstCard, secondCard]);
+        matchSound.play();
       }
+
+      setTimeout(() => setFlippedCards([]), 1000);
     }
-  }, [firstCard, secondCard]);
+  }, [flippedCards]);
 
-  // Function to remove selected cards and reset states
-  function removeSelection() {
-    setFirstCard(null);
-    setSecondCard(null);
-    setStopFlip(false);
-    setMoves((prevValue) => prevValue + 1);
-  }
+  const handleRestart = () => {
+    clickSound.play();
+    setCards(initialCards());
+    setFlippedCards([]);
+    setMatchedCards([]);
+    setGameWon(false);
+    setMoves(0);
+  };
 
-  // Start the game for the first time
-  React.useEffect(() => {
-    NewGame();
-  }, []);
-
-  // Timer Effect
-  React.useEffect(() => {
-    let interval;
-    if (won !== 6) {
-      interval = setInterval(() => {
-        setTimer((prev) => prev + 1);
-      }, 1000);
-    } else if (won === 6) {
-      clearInterval(interval);
-    }
-    return () => clearInterval(interval);
-  }, [won]);
+  const handleHome = () => {
+    clickSound.play();
+    navigate('/Home');
+  };
 
   return (
-    <div className="App">
-      <div className="container">
-        <div className="header">
-          <h1>Memory Game</h1>
-          <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-          </select>
-          <button className="button" onClick={() => { buttonClickSound.play(); navigate('/Home'); }}>
-            Home
-          </button>
-        </div>
-        <div className="board">
-          {
-            // Render cards
-            cardsArray.map((item) => (
-              <Card
-                item={item}
-                key={item.id}
-                handleSelectedCards={handleSelectedCards}
-                toggled={item === firstCard || item === secondCard || item.matched === true}
-                stopflip={stopFlip}
-              />
-            ))
-          }
-        </div>
-        {won !== 6 ? (
-          <div className="comments">
-            Moves : {moves} <br />
-            Timer: {timer}s
-          </div>
-        ) : (
-          <div className="comments">
-            🎉 You Won in {moves} moves and {timer} seconds! 🎉
-          </div>
-        )}
-        <button className="button" onClick={NewGame}>
-          New Game
-        </button>
-      </div>
-    </div>
+    <Grid container minHeight={"100vh"} sx={{ display: "flex", justifyContent: "center", alignItems: "center", background: theme.palette.background.default }}>
+      <Grid item xs={12} md={8}>
+        <Paper sx={{ padding: "30px", borderRadius: theme.shape.borderRadius, background: theme.palette.background.paper }}>
+          <Grid container spacing={2} direction="column">
+            <Grid item xs={12} sx={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
+              <Typography variant='h3'>Memory Game</Typography>
+            </Grid>
+
+            <Grid item xs={12} sx={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
+              <Button variant='contained' size='large' onClick={handleShowInstructions}>
+                Show Instructions
+              </Button>
+              <Button variant='contained' size='large' onClick={handleHome} sx={{ marginLeft: 2 }}>
+                Home
+              </Button>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Grid container spacing={2} sx={{ display: "flex", justifyContent: "center" }}>
+                {cards.map((card, index) => (
+                  <Grid item key={index} xs={3} md={2.5} sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center"
+                  }}>
+                    <IconButton onClick={() => handleCardClick(card)} disabled={flippedCards.includes(card) || matchedCards.includes(card)} sx={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: "50%",
+                      background: flippedCards.includes(card) || matchedCards.includes(card) ? theme.palette.secondary.main : theme.palette.primary.main,
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }}>
+                      <Typography variant='h6'>
+                        {(flippedCards.includes(card) || matchedCards.includes(card)) && card.icon}
+                      </Typography>
+                    </IconButton>
+                  </Grid>
+                ))}
+              </Grid>
+            </Grid>
+
+            <Grid item xs={12} sx={{ display: "flex", justifyContent: "center", marginTop: "20px", marginBottom: "20px" }}>
+              <Button variant='contained' size='large' onClick={handleRestart}>
+                Restart Game
+              </Button>
+            </Grid>
+
+            <Grid item xs={12} sx={{ display: "flex", justifyContent: "center" }}>
+              <Typography variant='h6'>Moves: {moves}</Typography>
+            </Grid>
+
+            <Grid item xs={12} sx={{ display: "flex", justifyContent: "center" }}>
+              {gameWon && <Typography variant='h5'>Congratulations! You won!</Typography>}
+            </Grid>
+          </Grid>
+        </Paper>
+      </Grid>
+
+      {/* Instructions Modal */}
+      <Modal open={modalOpen} onClose={handleCloseInstructions}>
+        <Box sx={{ p: 4, maxWidth: 400, margin: 'auto', bgcolor: 'background.paper', borderRadius: 2 }}>
+          <Typography variant='h6'>Instructions</Typography>
+          <Typography variant='body1' sx={{ mt: 2 }}>
+            Flip the cards to match pairs of icons. Try to match all pairs with the least number of moves.
+          </Typography>
+          <Button variant='contained' onClick={handleCloseInstructions} sx={{ mt: 2 }}>
+            Close
+          </Button>
+        </Box>
+      </Modal>
+    </Grid>
   );
-}
+};
 
 export default MemoryGame;
