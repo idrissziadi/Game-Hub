@@ -57,6 +57,9 @@ const Home = () => {
                   <Grid item xs={12} sm={6} md={4}>
                     <GameCard image={image} title={"Memory Game"} subTitle={"Memory Game"} route="/memorygame" />
                   </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <GameCard image={image} title={"Tetries Game"} subTitle={"Tetries Game"} route="/tetriesgame" />
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>

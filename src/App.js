@@ -14,6 +14,7 @@ import SimonSays from './pages/SimonSays';
 import Game from './pages/Game';
 import FlipGame from './pages/FlipGame';
 import MemoryGame from './pages/MemoryGame';
+import TetriesGame from './pages/TetriesGame';
 function App() {
   return (
     <ThemeProvider theme={theme}> 
@@ -31,6 +32,7 @@ function App() {
         <Route path='Game' Component={Game} />
         <Route path='flipgame' Component={FlipGame} />
         <Route path='memorygame' Component={MemoryGame} />
+        <Route path='tetriesgame' Component={TetriesGame} />
       </Routes>
     </BrowserRouter>
     </ThemeProvider>
