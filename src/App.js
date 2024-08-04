@@ -16,6 +16,7 @@ import FlipGame from './pages/FlipGame';
 import MemoryGame from './pages/MemoryGame';
 import TetriesGame from './pages/TetriesGame';
 import PingPong from './pages/PingPong';
+import PuzzleGame from './pages/PuzzleGame';
 function App() {
   return (
     <ThemeProvider theme={theme}> 
@@ -35,6 +36,7 @@ function App() {
         <Route path='memorygame' Component={MemoryGame} />
         <Route path='tetriesgame' Component={TetriesGame} />
         <Route path='pingpong' Component={PingPong} />
+        <Route path='puzzlegame' Component={PuzzleGame} />
       </Routes>
     </BrowserRouter>
     </ThemeProvider>
