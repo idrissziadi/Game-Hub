@@ -66,6 +66,9 @@ const Home = () => {
                   <Grid item xs={12} sm={6} md={4}>
                     <GameCard image={image} title={"PuzzleGame Game"} subTitle={"Puzzle Game"} route="/puzzlegame" />
                   </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <GameCard image={image} title={"Word Guess Game"} subTitle={"Word Guess Game"} route="/wordguess" />
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
