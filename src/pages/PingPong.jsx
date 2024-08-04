@@ -305,7 +305,7 @@ const PingPong = () => {
               <Button variant="contained" onClick={pauseGame} disabled={!gameRunning}>Pause Game</Button>
               <Button variant="contained" onClick={restartGame}>Restart Game</Button>
               <Button variant="contained" onClick={handleShowInstructions}>Instructions</Button>
-              <Button variant="contained" onClick={handleNavigateHome}>Home</Button>
+              <Button variant="contained" color='secondary' onClick={handleNavigateHome}>Home</Button>
             </Grid>
 
             <Modal open={instructionsOpen} onClose={handleCloseInstructions}>

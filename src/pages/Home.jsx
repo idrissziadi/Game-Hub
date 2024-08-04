@@ -60,6 +60,9 @@ const Home = () => {
                   <Grid item xs={12} sm={6} md={4}>
                     <GameCard image={image} title={"Tetries Game"} subTitle={"Tetries Game"} route="/tetriesgame" />
                   </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <GameCard image={image} title={"Ping Pong Game"} subTitle={"Ping Pong Game"} route="/pingpong" />
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
