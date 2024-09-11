@@ -35,8 +35,8 @@ To run this project locally, follow these steps:
 
 1. Clone the repository:
     ```bash
-    git clone [https://github.com/idrissziadi/gamehub.git](https://github.com/idrissziadi/Game-Hub.git)
-    cd gamehub
+    git clone https://github.com/idrissziadi/Game-Hub.git
+    cd Game-Hub
     ```
 
 2. Install dependencies:
